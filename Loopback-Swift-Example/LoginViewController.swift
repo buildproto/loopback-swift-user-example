@@ -13,7 +13,7 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var EmailTextField: UITextField!
     @IBOutlet weak var PasswordTextField: UITextField!
     @IBAction func LoginButton(sender: UIButton) {
-        BackendUtilities.sharedInstance.clientRepo.userByLoginWithEmail(EmailTextField.text, password: PasswordTextField.text, success: { (LBUser client) -> Void in
+        BackendUtilities.sharedInstance.clientRepo.userByLoginWithEmail(EmailTextField.text, password: PasswordTextField.text, success: { (client) -> Void in
                 NSLog("Successfully logged in.");
             
                 // Display login confirmation
@@ -22,7 +22,7 @@ class LoginViewController: UIViewController {
                 alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
                 self.presentViewController(alertController, animated: true, completion: nil)
             }) { (error: NSError!) -> Void in
-                NSLog("Error logging in.")
+                NSLog("Error logging in. \(error)")
                 
                 // Display error alert
                 let alertController = UIAlertController(title: "Login", message:

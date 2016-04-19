@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
 
-    var adapter:LBRESTAdapter = LBRESTAdapter(URL: NSURL(string: "http://api.backend.com:3000/api/"))
+    var adapter:LBRESTAdapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000/api/"))
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.

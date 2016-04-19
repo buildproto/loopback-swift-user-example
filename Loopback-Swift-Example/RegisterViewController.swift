@@ -26,8 +26,8 @@ class RegisterViewController: UIViewController {
             let user:Client = BackendUtilities.sharedInstance.clientRepo.createUserWithEmail(EmailTextField.text!, password: PasswordTextField.text!) as! Client
         
             user.saveWithSuccess({ () -> Void in
-                NSLog("Successfully registered new user with User ID: ")
-                NSLog(user._id as! String)
+                NSLog("Successfully registered new user with User ID: \(user._id)")
+                //NSLog(user._id as! String)
             
                 // Display registration confirmation
                 let alertController = UIAlertController(title: "Registration", message:
@@ -36,7 +36,7 @@ class RegisterViewController: UIViewController {
                 self.presentViewController(alertController, animated: true, completion: nil)
                 
                 }) { (error: NSError!) -> Void in
-                    NSLog("Error")
+                    NSLog("Error \(error)")
                 
                     // Display error alert for registration
                     let alertController = UIAlertController(title: "Registration", message:
