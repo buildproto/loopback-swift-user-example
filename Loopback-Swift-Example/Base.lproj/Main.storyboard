@@ -184,7 +184,7 @@
             </objects>
             <point key="canvasLocation" x="0.0" y="0.0"/>
         </scene>
-        <!--Account-->
+        <!--Delegate-->
         <scene sceneID="P0A-Ij-x3R">
             <objects>
                 <viewController title="Account" id="C89-fD-dFX" customClass="AccountViewController" customModule="Loopback_Swift_Example" customModuleProvider="target" sceneMemberID="viewController">
@@ -298,6 +298,13 @@
                                     <constraint firstAttribute="width" constant="30" id="pxX-QT-jOx"/>
                                 </constraints>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RFo-Kg-7O8" customClass="FBSDKLoginButton">
+                                <rect key="frame" x="202" y="406" width="158" height="30"/>
+                                <state key="normal" title="Link Facebook"/>
+                                <connections>
+                                    <outlet property="delegate" destination="C89-fD-dFX" id="4vF-8w-Rbc"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -348,6 +355,7 @@
                     <connections>
                         <outlet property="AccessTokenLabel" destination="BYV-ib-5bT" id="DXh-Uk-NaA"/>
                         <outlet property="EmailLabel" destination="Rav-kH-bvh" id="1M3-BK-U5T"/>
+                        <outlet property="FBLoginButton" destination="RFo-Kg-7O8" id="g8S-IM-atH"/>
                         <outlet property="UserIDLabel" destination="Qag-x5-OGu" id="Xny-5F-TQg"/>
                     </connections>
                 </viewController>

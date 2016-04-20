@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AccountViewController: UIViewController {
+class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
     var currentUser: Client
     var defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults()
     
@@ -20,6 +20,7 @@ class AccountViewController: UIViewController {
     @IBOutlet weak var AccessTokenLabel: UILabel!
     @IBOutlet weak var UserIDLabel: UILabel!
     @IBOutlet weak var EmailLabel: UILabel!
+    @IBOutlet weak var FBLoginButton: FBSDKLoginButton!
     
     @IBAction func ChangeEmailButton(sender: UIButton) {
         let alertController = InputAlertController.getInputAlertController("Email?", message: "Please enter your email", preferredStyle: .Alert)
@@ -56,10 +57,12 @@ class AccountViewController: UIViewController {
         }
     }
     override func viewDidLoad() {
-        
+        super.viewDidLoad()
+        FBLoginButton.readPermissions = ["public_profile", "email", "user_friends"]
     }
     
     override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         BackendUtilities.sharedInstance.clientRepo.findCurrentUserWithSuccess({ (client) -> Void in
             NSLog("Found user")
             if let _ = client    {
@@ -80,10 +83,52 @@ class AccountViewController: UIViewController {
         EmailLabel.text = currentUser.email
         
     }
+
+    // Facebook Delegate Methods
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    func loginButton(loginButton: FBSDKLoginButton!, didCompleteWithResult result: FBSDKLoginManagerLoginResult!, error: NSError!) {
+        print("User Logged In")
+        
+        if ((error) != nil)
+        {
+            // Process error
+        }
+        else if result.isCancelled {
+            // Handle cancellations
+        }
+        else {
+            // If you ask for multiple permissions at once, you
+            // should check if specific permissions missing
+            if result.grantedPermissions.contains("email")
+            {
+                // Do work
+            }
+        }
+    }
+    
+    func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
+        print("User Logged Out")
+    }
+    
+    func returnUserData()
+    {
+        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: nil)
+        graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
+            
+            if ((error) != nil)
+            {
+                // Process error
+                print("Error: \(error)")
+            }
+            else
+            {
+                print("fetched user: \(result)")
+                let userName : NSString = result.valueForKey("name") as! NSString
+                print("User Name is: \(userName)")
+                let userEmail : NSString = result.valueForKey("email") as! NSString
+                print("User Email is: \(userEmail)")
+            }
+        })
     }
 }
 
