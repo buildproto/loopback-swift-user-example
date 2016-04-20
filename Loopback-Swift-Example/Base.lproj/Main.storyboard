@@ -299,8 +299,8 @@
                                 </constraints>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RFo-Kg-7O8" customClass="FBSDKLoginButton">
-                                <rect key="frame" x="202" y="406" width="158" height="30"/>
-                                <state key="normal" title="Link Facebook"/>
+                                <rect key="frame" x="20" y="239" width="158" height="30"/>
+                                <state key="normal" title="Facebook login"/>
                                 <connections>
                                     <outlet property="delegate" destination="C89-fD-dFX" id="4vF-8w-Rbc"/>
                                 </connections>
