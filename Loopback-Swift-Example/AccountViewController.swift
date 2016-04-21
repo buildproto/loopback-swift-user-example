@@ -105,11 +105,11 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             }
             
             // Link account to server
-            let adapter: SLRESTAdapter = SLRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
+            let adapter: LBRESTAdapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
             adapter.accessToken = BackendUtilities.sharedInstance.adapter.accessToken
             print("accessToken: \(adapter.accessToken)")
-            adapter.contract.addItem(SLRESTContractItem(pattern: "/auth/facebook-token/callback", verb: "GET"), forMethod: "mobile-facebook-link")
-            let parameters: Dictionary = ["access_token": result.token.tokenString]
+            adapter.contract.addItem(SLRESTContractItem(pattern: "/link/facebook-token/callback", verb: "GET"), forMethod: "mobile-facebook-link")
+            let parameters: Dictionary = ["fb_access_token": result.token.tokenString]
             adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
                     print("success: got result: \(result)")
                 }, failure: { (error) in
