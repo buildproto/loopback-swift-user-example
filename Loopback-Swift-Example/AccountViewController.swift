@@ -76,6 +76,7 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
         }
         else {
             print("No shared token found")
+            FBSDKAccessToken.setCurrentAccessToken(nil)
         }
     }
     

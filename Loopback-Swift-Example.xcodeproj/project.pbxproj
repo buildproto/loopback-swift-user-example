@@ -374,6 +374,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Loopback-Swift-Example/Loopback-Swift-Example.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -382,6 +383,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "me.kevingoedecke.Loopback-Swift-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "828f21fa-0ba7-42a8-80cf-7cf5cf4da0ea";
 				SWIFT_OBJC_BRIDGING_HEADER = "Loopback-Swift-Example/Swift-Bridging-Header.h";
 			};
 			name = Debug;
@@ -392,6 +394,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Loopback-Swift-Example/Loopback-Swift-Example.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -400,6 +403,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "me.kevingoedecke.Loopback-Swift-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "828f21fa-0ba7-42a8-80cf-7cf5cf4da0ea";
 				SWIFT_OBJC_BRIDGING_HEADER = "Loopback-Swift-Example/Swift-Bridging-Header.h";
 			};
 			name = Release;
