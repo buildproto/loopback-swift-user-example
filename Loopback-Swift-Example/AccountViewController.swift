@@ -60,10 +60,22 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
                 self.loadUserInformation()
             }
             else    {
-                NSLog("No user")
+                self.loadSharedAccessToken()
             }
         }) { (error: NSError!) -> Void in
             NSLog("Error fetching current user")
+        }
+    }
+    
+    func loadSharedAccessToken() {
+        if let token = SharedLoginManager.sharedInstance().loadFacebookAccessToken() {
+            print("Found shared access token: \(token)")
+            FBSDKAccessToken.setCurrentAccessToken(token)
+            // And now try to log in with that token
+            self.onFacebookTokenReceived(token.tokenString)
+        }
+        else {
+            print("No shared token found")
         }
     }
     
@@ -112,36 +124,8 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             {
                 // Do work
             }
-            
-            // Link account to server
-            let adapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
-            // ^ The main adapter is initialized with /api
-            adapter.accessToken = BackendUtilities.sharedInstance.adapter.accessToken
-            var route: String?
-            if let _ = adapter.accessToken {
-                route = "/link/facebook-token/callback"
-            }
-            else {
-                route = "/auth/facebook-token/callback"
-            }
-            print("accessToken: \(adapter.accessToken)")
-            adapter.contract.addItem(SLRESTContractItem(pattern: route, verb: "GET"), forMethod: "mobile-facebook-link")
-            let parameters: Dictionary = ["fb_access_token": result.token.tokenString]
-            adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
-                    print("success: got result: \(result)")
-                if let jsonResult = result as? Dictionary<String, AnyObject> {
-                    if let accessToken = jsonResult["access_token"] as? String {
-                        BackendUtilities.sharedInstance.adapter.accessToken = accessToken
-                    }
-                    if let userId = jsonResult["userId"] {
-                        BackendUtilities.sharedInstance.clientRepo.currentUserId = userId.stringValue
-                        self.lookupCurrentUser()
-                    }
-                }
-                
-                }, failure: { (error) in
-                    print("error: got error \(error)")
-            })
+            SharedLoginManager.sharedInstance().storeFacebookAccessToken(result.token)
+            self.onFacebookTokenReceived(result.token.tokenString)
         }
     }
     
@@ -169,6 +153,39 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
                 print("User Email is: \(userEmail)")
             }
         })
+    }
+    
+    func onFacebookTokenReceived(tokenString: String) {
+        // Link account to server
+        let adapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
+        // ^ The main adapter is initialized with /api
+        adapter.accessToken = BackendUtilities.sharedInstance.adapter.accessToken
+        var route: String?
+        if let _ = adapter.accessToken {
+            route = "/link/facebook-token/callback"
+        }
+        else {
+            route = "/auth/facebook-token/callback"
+        }
+        print("accessToken: \(adapter.accessToken)")
+        adapter.contract.addItem(SLRESTContractItem(pattern: route, verb: "GET"), forMethod: "mobile-facebook-link")
+        let parameters: Dictionary = ["fb_access_token": tokenString]
+        adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
+            print("success: got result: \(result)")
+            if let jsonResult = result as? Dictionary<String, AnyObject> {
+                if let accessToken = jsonResult["access_token"] as? String {
+                    BackendUtilities.sharedInstance.adapter.accessToken = accessToken
+                }
+                if let userId = jsonResult["userId"] {
+                    BackendUtilities.sharedInstance.clientRepo.currentUserId = userId.stringValue
+                    self.lookupCurrentUser()
+                }
+            }
+            
+            }, failure: { (error) in
+                print("error: got error \(error)")
+        })
+
     }
 }
 
