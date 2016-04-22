@@ -39,6 +39,41 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
         self.presentViewController(alertController, animated: true, completion: nil)
     }
     @IBAction func LogoutButton(sender: UIButton) {
+        self.logoutCurrentUser()
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        FBLoginButton.readPermissions = ["public_profile", "email", "user_friends"]
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        self.lookupCurrentUser()
+        // ^ This is getting called twice after FB login. FYI
+    }
+    
+    func lookupCurrentUser() {
+        BackendUtilities.sharedInstance.clientRepo.findCurrentUserWithSuccess({ (client) -> Void in
+            if let _ = client    {
+                NSLog("Found user \(client)")
+                self.currentUser = client as! Client
+                self.loadUserInformation()
+            }
+            else    {
+                NSLog("No user")
+            }
+        }) { (error: NSError!) -> Void in
+            NSLog("Error fetching current user")
+        }
+    }
+    
+    func loadUserInformation()  {
+        AccessTokenLabel.text = BackendUtilities.sharedInstance.adapter.accessToken
+        UserIDLabel.text = currentUser._id as? String
+        EmailLabel.text = currentUser.email
+    }
+    
+    func logoutCurrentUser() {
         BackendUtilities.sharedInstance.clientRepo.logoutWithSuccess({ () -> Void in
             // Reset local Client class object
             NSLog("Successfully logged out")
@@ -52,36 +87,10 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             
             self.currentUser = Client()
             self.loadUserInformation()
-            }) { (error: NSError!) -> Void in
-                NSLog("Error logging out")
+        }) { (error: NSError!) -> Void in
+            NSLog("Error logging out")
         }
-    }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        FBLoginButton.readPermissions = ["public_profile", "email", "user_friends"]
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        BackendUtilities.sharedInstance.clientRepo.findCurrentUserWithSuccess({ (client) -> Void in
-            NSLog("Found user")
-            if let _ = client    {
-                self.currentUser = client as! Client
-                self.loadUserInformation()
-            }
-            else    {
-            }
-            }) { (error: NSError!) -> Void in
-                NSLog("Error fetching current user")
-        }
-        
-    }
-    
-    func loadUserInformation()  {
-        AccessTokenLabel.text = BackendUtilities.sharedInstance.adapter.accessToken
-        UserIDLabel.text = currentUser._id as? String
-        EmailLabel.text = currentUser.email
-        
+
     }
 
     // Facebook Delegate Methods
@@ -105,13 +114,24 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             }
             
             // Link account to server
-            let adapter: LBRESTAdapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
+            let adapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
+            // ^ The main adapter is initialized with /api
             adapter.accessToken = BackendUtilities.sharedInstance.adapter.accessToken
             print("accessToken: \(adapter.accessToken)")
-            adapter.contract.addItem(SLRESTContractItem(pattern: "/link/facebook-token/callback", verb: "GET"), forMethod: "mobile-facebook-link")
+            adapter.contract.addItem(SLRESTContractItem(pattern: "/auth/facebook-token/callback", verb: "GET"), forMethod: "mobile-facebook-link")
             let parameters: Dictionary = ["fb_access_token": result.token.tokenString]
             adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
                     print("success: got result: \(result)")
+                if let jsonResult = result as? Dictionary<String, AnyObject> {
+                    if let accessToken = jsonResult["access_token"] as? String {
+                        BackendUtilities.sharedInstance.adapter.accessToken = accessToken
+                    }
+                    if let userId = jsonResult["userId"] {
+                        BackendUtilities.sharedInstance.clientRepo.currentUserId = userId.stringValue
+                        self.lookupCurrentUser()
+                    }
+                }
+                
                 }, failure: { (error) in
                     print("error: got error \(error)")
             })
@@ -120,6 +140,7 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
     
     func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
         print("User Logged Out")
+        self.logoutCurrentUser()
     }
     
     func returnUserData()

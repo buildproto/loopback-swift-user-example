@@ -9,6 +9,18 @@
 import Foundation
 
 class ClientRepository: LBUserRepository {
+    
+    var mutableCurrentUserId: String?
+    override var currentUserId: String! {
+        // ^ had to override this val so we can set it from the FB linked login request
+        get {
+            return mutableCurrentUserId
+        }
+        set {
+            mutableCurrentUserId = newValue
+        }
+    }
+
     override init!(className name: String!) {
         super.init(className: "users")
     }
