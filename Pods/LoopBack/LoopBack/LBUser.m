@@ -80,7 +80,7 @@ static NSString * const DEFAULTS_CURRENT_USER_ID_KEY = @"LBUserRepositoryCurrent
                          }
                          LBAccessToken *accessToken = (LBAccessToken*)[self.accessTokenRepository modelWithDictionary:(NSDictionary*)value];
                          adapter.accessToken = accessToken._id;
-                         self.currentUserId = accessToken.userId;
+                         self.currentUserId = [NSString stringWithFormat:@"%@", accessToken.userId];
                          success(accessToken);
                      } failure:failure];
 }

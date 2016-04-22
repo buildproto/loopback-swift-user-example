@@ -117,8 +117,15 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             let adapter = LBRESTAdapter(URL: NSURL(string: "http://localhost:3000"))
             // ^ The main adapter is initialized with /api
             adapter.accessToken = BackendUtilities.sharedInstance.adapter.accessToken
+            var route: String?
+            if let _ = adapter.accessToken {
+                route = "/link/facebook-token/callback"
+            }
+            else {
+                route = "/auth/facebook-token/callback"
+            }
             print("accessToken: \(adapter.accessToken)")
-            adapter.contract.addItem(SLRESTContractItem(pattern: "/auth/facebook-token/callback", verb: "GET"), forMethod: "mobile-facebook-link")
+            adapter.contract.addItem(SLRESTContractItem(pattern: route, verb: "GET"), forMethod: "mobile-facebook-link")
             let parameters: Dictionary = ["fb_access_token": result.token.tokenString]
             adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
                     print("success: got result: \(result)")
@@ -140,7 +147,7 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
     
     func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
         print("User Logged Out")
-        self.logoutCurrentUser()
+        //self.logoutCurrentUser()
     }
     
     func returnUserData()
