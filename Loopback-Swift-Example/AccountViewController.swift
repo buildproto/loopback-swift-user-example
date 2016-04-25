@@ -44,6 +44,20 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         FBLoginButton.readPermissions = ["public_profile", "email", "user_friends"]
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AccountViewController.observeTokenChange(_:)), name: FBSDKAccessTokenDidChangeNotification, object: nil)
+    }
+    
+    func observeTokenChange(notification: NSNotification) {
+        
+        guard let _ = FBSDKAccessToken.currentAccessToken()
+            else {
+                SharedLoginManager.sharedInstance().clearFacebookAccessToken()
+                print("FB user access token changed, and is now nil")
+                return
+        }
+            
+        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -71,6 +85,10 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
         if let token = SharedLoginManager.sharedInstance().loadFacebookAccessToken() {
             print("Found shared access token: \(token)")
             FBSDKAccessToken.setCurrentAccessToken(token)
+            FBSDKAccessToken.refreshCurrentAccessToken({ (connection: FBSDKGraphRequestConnection!, result: AnyObject!, error: NSError!) in
+                print("refreshed token, result: \(result) error \(error)")
+                //NB, from the docs: On a successful refresh, the currentAccessToken will be updated so you typically only need to observe the FBSDKAccessTokenDidChangeNotification notification.
+            })
             // And now try to log in with that token
             self.onFacebookTokenReceived(token.tokenString)
         }
