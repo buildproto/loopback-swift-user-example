@@ -13,10 +13,15 @@
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
 
 // Helpers
+#import "LoopbackAccessToken.h"
 #import "UICKeychainStore.h"
 
 static NSString * const kSharedKeychainKeyFacebookAccessToken = @"FacebookAccessToken";
 static NSString * const kSharedKeychainServiceFacebook = @"Facebook";
+
+static NSString * const kSharedKeychainKeyLoopbackAccessToken = @"LoopbackAccessToken";
+static NSString * const kSharedKeychainServiceLoopback = @"Loopback"; // Subhub? Didn't want to commit yet
+
 
 @implementation SharedLoginManager
 
@@ -30,12 +35,14 @@ static NSString * const kSharedKeychainServiceFacebook = @"Facebook";
     return __sharedInstance;
 }
 
-#pragma mark - Facebook Helpers
+#pragma mark - Facebook
 - (void)storeFacebookAccessToken:(FBSDKAccessToken *)token
 {
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:token];
-    [UICKeyChainStore setData:data forKey:kSharedKeychainKeyFacebookAccessToken service:kSharedKeychainServiceFacebook];
-    NSLog(@"archived and saved token with string: %@", token.tokenString);
+    if (token) {
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:token];
+        [UICKeyChainStore setData:data forKey:kSharedKeychainKeyFacebookAccessToken service:kSharedKeychainServiceFacebook];
+        NSLog(@"archived and saved %@ token with string: %@", kSharedKeychainServiceFacebook, token.tokenString);
+    }
 }
 
 - (void)clearFacebookAccessToken
@@ -46,9 +53,38 @@ static NSString * const kSharedKeychainServiceFacebook = @"Facebook";
 - (FBSDKAccessToken *)loadFacebookAccessToken
 {
     NSData *data = [UICKeyChainStore dataForKey:kSharedKeychainKeyFacebookAccessToken service:kSharedKeychainServiceFacebook];
-    FBSDKAccessToken *token = (FBSDKAccessToken *)[NSKeyedUnarchiver unarchiveObjectWithData:data];
-    NSLog(@"unarchived token with string: %@", token.tokenString);
-    return token;
+    if (data) {
+        FBSDKAccessToken *token = (FBSDKAccessToken *)[NSKeyedUnarchiver unarchiveObjectWithData:data];
+        NSLog(@"unarchived %@ token with string: %@", kSharedKeychainServiceFacebook, token.tokenString);
+        return token;
+    }
+    return nil;
+}
+
+#pragma mark - Loopback
+- (void)storeLoopbackAccessToken:(LoopbackAccessToken *)token
+{
+    if (token) {
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:token];
+        [UICKeyChainStore setData:data forKey:kSharedKeychainKeyLoopbackAccessToken service:kSharedKeychainServiceLoopback];
+        NSLog(@"archived and saved %@ token with string: %@", kSharedKeychainServiceLoopback, token.tokenString);
+    }
+}
+
+- (void)clearLoopbackAccessToken
+{
+    [UICKeyChainStore removeItemForKey:kSharedKeychainKeyLoopbackAccessToken service:kSharedKeychainServiceLoopback];
+}
+
+- (LoopbackAccessToken *)loadLoopbackAccessToken
+{
+    NSData *data = [UICKeyChainStore dataForKey:kSharedKeychainKeyLoopbackAccessToken service:kSharedKeychainServiceLoopback];
+    if (data) {
+        LoopbackAccessToken *token = (LoopbackAccessToken *)[NSKeyedUnarchiver unarchiveObjectWithData:data];
+        NSLog(@"unarchived %@ token with string: %@", kSharedKeychainServiceLoopback, token.tokenString);
+        return token;
+    }
+    return nil;
 }
 
 @end

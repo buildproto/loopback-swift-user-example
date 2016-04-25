@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class FBSDKAccessToken;
+@class LoopbackAccessToken;
 
 @interface SharedLoginManager : NSObject
 
@@ -17,5 +18,9 @@
 - (void)storeFacebookAccessToken:(FBSDKAccessToken *)token;
 - (void)clearFacebookAccessToken;
 - (FBSDKAccessToken *)loadFacebookAccessToken;
+
+- (void)storeLoopbackAccessToken:(LoopbackAccessToken *)token;
+- (void)clearLoopbackAccessToken;
+- (LoopbackAccessToken *)loadLoopbackAccessToken;
 
 @end

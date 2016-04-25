@@ -19,6 +19,7 @@
 		0A750D8B1C19FB6D00F48A50 /* InputAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A750D8A1C19FB6D00F48A50 /* InputAlertController.swift */; };
 		103688FAEA7128A9C19DEC0F /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 142A902AFEA4F739CA791275 /* libPods.a */; };
 		413959DA1CCA6B040058EF94 /* SharedLoginManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 413959D81CCA6B040058EF94 /* SharedLoginManager.m */; };
+		413959DE1CCE33BA0058EF94 /* LoopbackAccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 413959DD1CCE33BA0058EF94 /* LoopbackAccessToken.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,8 @@
 		413959D81CCA6B040058EF94 /* SharedLoginManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharedLoginManager.m; sourceTree = "<group>"; };
 		413959D91CCA6B040058EF94 /* SharedLoginManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedLoginManager.h; sourceTree = "<group>"; };
 		413959DB1CCA70120058EF94 /* Loopback-Swift-Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Loopback-Swift-Example.entitlements"; sourceTree = "<group>"; };
+		413959DC1CCE33BA0058EF94 /* LoopbackAccessToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoopbackAccessToken.h; sourceTree = "<group>"; };
+		413959DD1CCE33BA0058EF94 /* LoopbackAccessToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoopbackAccessToken.m; sourceTree = "<group>"; };
 		51A87410302D02BE9C1666CD /* libPods-Loopback-Swift-Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Loopback-Swift-Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		88117CFF40956275212A47BF /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		FCA0F51B6DB10CB3EC149418 /* Pods-Loopback-Swift-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Loopback-Swift-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Loopback-Swift-Example/Pods-Loopback-Swift-Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -100,8 +103,10 @@
 		413959D71CCA6AEB0058EF94 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				413959D81CCA6B040058EF94 /* SharedLoginManager.m */,
 				413959D91CCA6B040058EF94 /* SharedLoginManager.h */,
+				413959D81CCA6B040058EF94 /* SharedLoginManager.m */,
+				413959DC1CCE33BA0058EF94 /* LoopbackAccessToken.h */,
+				413959DD1CCE33BA0058EF94 /* LoopbackAccessToken.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -254,6 +259,7 @@
 			files = (
 				0A7215461C17BCFD00FC3679 /* LoginViewController.swift in Sources */,
 				0A750D8B1C19FB6D00F48A50 /* InputAlertController.swift in Sources */,
+				413959DE1CCE33BA0058EF94 /* LoopbackAccessToken.m in Sources */,
 				413959DA1CCA6B040058EF94 /* SharedLoginManager.m in Sources */,
 				0A7215421C17A6A700FC3679 /* ClientRepository.swift in Sources */,
 				0A72154A1C17C20600FC3679 /* AccountViewController.swift in Sources */,

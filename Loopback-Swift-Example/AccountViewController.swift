@@ -33,7 +33,7 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
                     }, failure: { (error: NSError!) -> Void in
                         NSLog("error saving")
                 })
-                self.loadUserInformation()
+                self.displayUserInformation()
             }
             })
         self.presentViewController(alertController, animated: true, completion: nil)
@@ -48,66 +48,87 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(AccountViewController.observeTokenChange(_:)), name: FBSDKAccessTokenDidChangeNotification, object: nil)
     }
     
-    func observeTokenChange(notification: NSNotification) {
-        
-        guard let _ = FBSDKAccessToken.currentAccessToken()
-            else {
-                SharedLoginManager.sharedInstance().clearFacebookAccessToken()
-                print("FB user access token changed, and is now nil")
-                return
-        }
-            
-        
-    }
-    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        self.lookupCurrentUser()
+        self.loadSharedAccessToken()
         // ^ This is getting called twice after FB login. FYI
     }
     
     func lookupCurrentUser() {
         BackendUtilities.sharedInstance.clientRepo.findCurrentUserWithSuccess({ (client) -> Void in
             if let _ = client    {
-                NSLog("Found user \(client)")
+                print("Found user \(client)")
                 self.currentUser = client as! Client
-                self.loadUserInformation()
+                self.displayUserInformation()
             }
-            else    {
+            else {
+                print("User not defined in server response")
+                // Clear the token, and try again (maybe the FB token will be valid)
+                SharedLoginManager.sharedInstance().clearLoopbackAccessToken()
                 self.loadSharedAccessToken()
             }
         }) { (error: NSError!) -> Void in
-            NSLog("Error fetching current user")
+            print("Error fetching current user")
+            // Clear the token, and try again (maybe the FB token will be valid)
+            SharedLoginManager.sharedInstance().clearLoopbackAccessToken()
+            self.loadSharedAccessToken()
         }
     }
     
+    
+    ////////////
+    // 1) Check for loopback token, if it exists try to resurrect server session with it
+    // 2) If no loopback token, lookup FB token, try to login with that
+    // 3) else, no session
     func loadSharedAccessToken() {
-        if let token = SharedLoginManager.sharedInstance().loadFacebookAccessToken() {
-            print("Found shared access token: \(token)")
+        if let token = SharedLoginManager.sharedInstance().loadLoopbackAccessToken() {
+            print("Found shared loopback token: \(token)")
+            BackendUtilities.sharedInstance.adapter.accessToken = token.tokenString
+            BackendUtilities.sharedInstance.clientRepo.currentUserId = token.userID
+            
+            // TODO: If not online, should expire the token client side at some point
+            
+            // Verify session by looking up our user
+            self.lookupCurrentUser()
+        }
+        else if let token = SharedLoginManager.sharedInstance().loadFacebookAccessToken() {
+            print("Found shared FB access token: \(token)")
             FBSDKAccessToken.setCurrentAccessToken(token)
             FBSDKAccessToken.refreshCurrentAccessToken({ (connection: FBSDKGraphRequestConnection!, result: AnyObject!, error: NSError!) in
-                print("refreshed token, result: \(result) error \(error)")
+                print("refreshed FB token, result: \(result) error \(error)")
                 //NB, from the docs: On a successful refresh, the currentAccessToken will be updated so you typically only need to observe the FBSDKAccessTokenDidChangeNotification notification.
             })
             // And now try to log in with that token
             self.onFacebookTokenReceived(token.tokenString)
         }
         else {
-            print("No shared token found")
+            print("No shared tokens found")
             FBSDKAccessToken.setCurrentAccessToken(nil)
         }
     }
     
-    func loadUserInformation()  {
-        AccessTokenLabel.text = BackendUtilities.sharedInstance.adapter.accessToken
-        UserIDLabel.text = currentUser._id as? String
-        EmailLabel.text = currentUser.email
+    func displayUserInformation()  {
+        if currentUser._id != nil {
+            AccessTokenLabel.text = BackendUtilities.sharedInstance.adapter.accessToken
+            UserIDLabel.text = currentUser._id.stringValue
+            EmailLabel.text = currentUser.email
+        }
+        else {
+            AccessTokenLabel.text = "N/A"
+            UserIDLabel.text = "N/A"
+            EmailLabel.text = "N/A"
+        }
     }
     
     func logoutCurrentUser() {
+        
+        // Tell the server we're logging out
         BackendUtilities.sharedInstance.clientRepo.logoutWithSuccess({ () -> Void in
             // Reset local Client class object
             NSLog("Successfully logged out")
+
+            // Clear the shared token (has to happen after we tell the server)
+            SharedLoginManager.sharedInstance().clearLoopbackAccessToken()
             
             // Display logout confirmation
             let alertController = UIAlertController(title: "Logout", message:
@@ -117,9 +138,12 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
             self.presentViewController(alertController, animated: true, completion: nil)
             
             self.currentUser = Client()
-            self.loadUserInformation()
+            self.displayUserInformation()
         }) { (error: NSError!) -> Void in
             NSLog("Error logging out")
+
+            // Clear the shared token anyway
+            SharedLoginManager.sharedInstance().clearLoopbackAccessToken()
         }
 
     }
@@ -151,6 +175,16 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
     func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
         print("User Logged Out")
         //self.logoutCurrentUser()
+    }
+    
+    func observeTokenChange(notification: NSNotification) {
+        
+        guard let _ = FBSDKAccessToken.currentAccessToken()
+            else {
+                SharedLoginManager.sharedInstance().clearFacebookAccessToken()
+                print("FB user access token changed, and is now nil")
+                return
+        }
     }
     
     func returnUserData()
@@ -192,16 +226,23 @@ class AccountViewController: UIViewController, FBSDKLoginButtonDelegate {
         adapter.invokeStaticMethod("mobile-facebook-link", parameters: parameters, bodyParameters: nil, outputStream: nil, success: { (result) in
             print("success: got result: \(result)")
             if let jsonResult = result as? Dictionary<String, AnyObject> {
-                if let accessToken = jsonResult["access_token"] as? String {
+                if let accessToken = jsonResult["access_token"] as? String, userId = jsonResult["userId"] {
+                    
+                    // Should the createDate get reset here?
+                    if let token = LoopbackAccessToken(userID: userId.stringValue, tokenString: BackendUtilities.sharedInstance.adapter.accessToken, createDate: NSDate()) {
+                        // Store the token
+                        SharedLoginManager.sharedInstance().storeLoopbackAccessToken(token)
+                    }
+                    
+                    // Update LB adapter state
                     BackendUtilities.sharedInstance.adapter.accessToken = accessToken
-                }
-                if let userId = jsonResult["userId"] {
                     BackendUtilities.sharedInstance.clientRepo.currentUserId = userId.stringValue
+                    // Lookup the user
                     self.lookupCurrentUser()
                 }
             }
             
-            }, failure: { (error) in
+        }, failure: { (error) in
                 print("error: got error \(error)")
         })
 

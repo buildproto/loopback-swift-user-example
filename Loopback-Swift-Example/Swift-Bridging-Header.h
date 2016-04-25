@@ -10,5 +10,5 @@
 
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
-//#import <UICKeyChainStore.h>
+#import "LoopbackAccessToken.h"
 #import "SharedLoginManager.h"

@@ -16,19 +16,23 @@ class LoginViewController: UIViewController {
         BackendUtilities.sharedInstance.clientRepo.userByLoginWithEmail(EmailTextField.text, password: PasswordTextField.text, success: { (client) -> Void in
                 NSLog("Successfully logged in.");
             
-                // Display login confirmation
-                let alertController = UIAlertController(title: "Login", message:
-                    "Successfully logged in", preferredStyle: UIAlertControllerStyle.Alert)
-                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
-                self.presentViewController(alertController, animated: true, completion: nil)
-            }) { (error: NSError!) -> Void in
-                NSLog("Error logging in. \(error)")
-                
-                // Display error alert
-                let alertController = UIAlertController(title: "Login", message:
-                    "Login failed", preferredStyle: UIAlertControllerStyle.Alert)
-                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
-                self.presentViewController(alertController, animated: true, completion: nil)
+            if let token = LoopbackAccessToken(userID: client._id.stringValue, tokenString: BackendUtilities.sharedInstance.adapter.accessToken, createDate: NSDate()) {
+                SharedLoginManager.sharedInstance().storeLoopbackAccessToken(token)
+            }
+            
+            // Display login confirmation
+            let alertController = UIAlertController(title: "Login", message:
+                "Successfully logged in", preferredStyle: UIAlertControllerStyle.Alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }) { (error: NSError!) -> Void in
+            NSLog("Error logging in. \(error)")
+            
+            // Display error alert
+            let alertController = UIAlertController(title: "Login", message:
+                "Login failed", preferredStyle: UIAlertControllerStyle.Alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
+            self.presentViewController(alertController, animated: true, completion: nil)
         }
 
     }
